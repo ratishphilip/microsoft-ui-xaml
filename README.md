@@ -1,73 +1,33 @@
+
 # Windows UI Library
 
 [![Follow WinUI on Twitter](https://img.shields.io/twitter/follow/windowsui.svg?label=Follow%20WinUI%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=windowsui)
 
-The Windows UI Library (WinUI) provides official native Microsoft UI controls and features for Windows [UWP apps](https://docs.microsoft.com/windows/uwp/index).
+WinUI is a user interface layer that contains modern controls and styles for building Windows apps. </span> As the native UI layer in Windows it embodies <a href="https://www.microsoft.com/design/fluent/#/">Fluent Design</a>, giving each Windows app the polished feel that customers expect.
 
-WinUI is the easiest way to build great [Fluent Design](https://docs.microsoft.com/windows/uwp/design/fluent-design-system/) experiences for Windows.
+WinUI 2 is a library of controls that provides official native Microsoft UI controls and features for Windows [UWP apps](https://docs.microsoft.com/windows/uwp/index). WinUI 2 can be used in any Windows 10 UWP XAML app, or in a Xamarin.Forms app running on Windows 10 using [native view embedding](https://docs.microsoft.com/xamarin/xamarin-forms/platform/native-views).
 
-WinUI can be used in any Windows 10 UWP XAML app, or in a Xamarin.Forms app running on Windows 10 using [native view embedding](https://docs.microsoft.com/xamarin/xamarin-forms/platform/native-views).
-
-## :pizza: Achievement unlocked: "1000 Contributions" Winners! :pizza:
-
-As a thank you to all of you and in celebration of hitting our 1000th community contribution (submitted by [@eugenegff](https://github.com/eugenegff)), we have selected [@eugenegff](https://github.com/eugenegff)  + nine other community members who watch our repo and follow us on Twitter to receive a special thank you: 
-
-
-[@sonnemaf](https://github.com/sonnemaf)
-
-
-[@Felix-Dev](https://github.com/Felix-Dev)
-
-
-[@vgromfeld](https://github.com/vgromfeld)
-
-
-[@Niels9001](https://github.com/Niels9001)
-
-
-[@navarro_mael](https://twitter.com/navarro_mael)
-
-
-[@erossetto](https://github.com/erossetto)
-
-
-[@gvhung](https://github.com/gvhung)
-
-
-[@myokeeh](https://github.com/myokeeh)
-
-
-[@MartinZikmund](https://github.com/MartinZikmund)
+WinUI 3 is the next version of the WinUI framework, shipping later this year. It dramatically expands WinUI into a full UX framework, making WinUI available for all types of Windows apps – from Win32 to UWP – for use as the UI layer.
 
 
 
+## WinUI Community Calls
 
-### We also want to thank some of our most involved repo rockstars a special gift as well: 
+The WinUI community call is your monthly opportunity to learn about native UX development for Windows with WinUI.
 
+In these calls we’ll discuss the WinUI roadmap, our status and your feedback.
 
-[@mdtauk](https://github.com/mdtauk)
+You can watch them online here on YouTube at the [Windows Developer channel](https://www.youtube.com/channel/UCzLbHrU7U3cUDNQWWAqjceA).
 
+Add the event to your calendar: [ICS calendar file](https://aka.ms/winuicommunitycall)
 
-[@mrlacey](https://github.com/mrlacey)
+## WinUI 3.0 Alpha (February 2020)
 
+As outlined in the [roadmap](docs/roadmap.md) we're currently working on WinUI 3.0, which will greatly expand the scope of WinUI to include the full native Windows UI platform.
 
-[@Knightmeister](https://github.com/Knightmeister)
+You can now [download an early build of WinUI 3.0 Alpha](https://docs.microsoft.com/uwp/toolkits/winui3/) to try out - we'd love your feedback!
 
-
-[@Poopooracoocoo](https://github.com/Poopooracoocoo)
-
-
-[@dotMorten](https://github.com/dotMorten)
-
-
-
-#### Winners, keep an eye out for an email coming next week. We’re excited to keep working with you and evolving WinUI as your premiere UI framework on Windows!
-
-## WinUI 3.0 Announcement
-
-At the Microsoft Build conference in May 2019 we [shared our plans for WinUI 3.0](https://mybuild.techcommunity.microsoft.com/sessions/77008), which will greatly expand the scope of WinUI to include the full native Windows UI platform. 
-
-For more info check out the updated [**roadmap**](https://github.com/microsoft/microsoft-ui-xaml/blob/master/docs/roadmap.md) and join the discussion in the [**3.0 discussion issue**](https://github.com/microsoft/microsoft-ui-xaml/issues/717).
+For more info see the [discussion issue #1965](https://github.com/microsoft/microsoft-ui-xaml/issues/1965).
 
 ## Using WinUI
 You can download and use WinUI packages in your app using the NuGet package manager: see the [Getting Started with the Windows UI Library](https://docs.microsoft.com/uwp/toolkits/winui/getting-started) page for more information.
@@ -76,7 +36,7 @@ You can download and use WinUI packages in your app using the NuGet package mana
 
 | NuGet Package | Build Status | Latest Versions | Documentation |
 | --- | --- | --- | --- |
-| [Microsoft.UI.Xaml](https://www.nuget.org/packages/Microsoft.UI.Xaml) <br /> Controls and Fluent Design for UWP apps | [![Build Status](https://dev.azure.com/ms/microsoft-ui-xaml/_apis/build/status/WinUI-Public-MUX-CI?branchName=master)](https://dev.azure.com/ms/microsoft-ui-xaml/_build/latest?definitionId=20?branchName=master) | [![latest stable version](https://img.shields.io/nuget/v/Microsoft.UI.Xaml.svg)](https://www.nuget.org/packages/Microsoft.UI.Xaml) <br /> [![latest prerelease version](https://img.shields.io/nuget/vpre/Microsoft.UI.Xaml.svg)](https://www.nuget.org/packages/Microsoft.UI.Xaml/absoluteLatest) | [2.2 release](https://docs.microsoft.com/uwp/toolkits/winui/release-notes/winui-2.2) |
+| [Microsoft.UI.Xaml](https://www.nuget.org/packages/Microsoft.UI.Xaml) <br /> Controls and Fluent Design for UWP apps | [![Build Status](https://dev.azure.com/ms/microsoft-ui-xaml/_apis/build/status/WinUI-Public-MUX-CI?branchName=master)](https://dev.azure.com/ms/microsoft-ui-xaml/_build/latest?definitionId=20?branchName=master) | [![latest stable version](https://img.shields.io/nuget/v/Microsoft.UI.Xaml.svg)](https://www.nuget.org/packages/Microsoft.UI.Xaml) <br /> [![latest prerelease version](https://img.shields.io/nuget/vpre/Microsoft.UI.Xaml.svg)](https://www.nuget.org/packages/Microsoft.UI.Xaml/absoluteLatest) | [2.3 release](https://docs.microsoft.com/uwp/toolkits/winui/release-notes/winui-2.3) |
 | [Microsoft.UI.Xaml.Core.Direct](https://www.nuget.org/packages/Microsoft.UI.Xaml.Core.Direct) <br /> Low-level APIs for middleware components | | [![latest prerelease version](https://img.shields.io/nuget/vpre/Microsoft.UI.Xaml.Core.Direct.svg)](https://www.nuget.org/packages/Microsoft.UI.Xaml.Core.Direct/absoluteLatest) | [2.0 prerelease](https://docs.microsoft.com/uwp/api/microsoft.ui.xaml.core.direct) |
 
 You can also build a WinUI package yourself from source. See [Contributing to the Windows UI Library](CONTRIBUTING.md) for more information on building and contributing to WinUI.
@@ -103,7 +63,7 @@ For information on how to contribute please see [Contributing to the Windows UI 
 
 ### Benefits
 
-The WinUI Library provides some useful benefits when building apps for Windows 10:
+WinUI 2 provides some useful benefits when building apps for Windows 10:
 
 1. **Helps you stay up to date**  
 WinUI helps keep your app up to date with the latest versions of key controls and features of [UWP XAML](https://docs.microsoft.com/windows/uwp/xaml-platform/xaml-overview) and the [Fluent Design System](https://www.microsoft.com/design/fluent)
@@ -116,9 +76,9 @@ You don't need version checks or conditional XAML markup to use WinUI controls o
 
 ### Version support
 
-The Microsoft.UI.Xaml 2.2 NuGet package requires your project to have TargetPlatformVersion &gt;= 10.0.18362.0 and TargetPlatformMinVersion &gt;= 10.0.15063.0 when building. 
+The Microsoft.UI.Xaml 2.3 NuGet package requires your project to have TargetPlatformVersion &gt;= 10.0.18362.0 and TargetPlatformMinVersion &gt;= 10.0.15063.0 when building. 
 
-Your app's users can be on any of the following supported Windows versions:
+Your app's users can be on any of the following supported Windows 10 versions:
 
 * Windows Insider Previews
 * May 2019 Update (18362 aka "19H1")

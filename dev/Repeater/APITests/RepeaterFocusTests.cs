@@ -33,7 +33,7 @@ using ItemsRepeaterScrollHost = Microsoft.UI.Xaml.Controls.ItemsRepeaterScrollHo
 namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests.RepeaterTests
 {
     [TestClass]
-    public class RepeaterFocusTests : TestsBase
+    public class RepeaterFocusTests : ApiTestBase
     {
         [TestMethod]
         public void ValidateTabNavigation()
@@ -124,6 +124,13 @@ namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests.RepeaterTests
             foreach(var expectedElement in expectedSequence)
             {
                 var actualElement = (Button)FocusManager.FindNextFocusableElement(FocusNavigationDirection.Next);
+
+                // We need to ignore the toggle theme button, so lets set its tabstop to false and get next element.
+                if((string)actualElement.Content == "Toggle theme")
+                {
+                    actualElement.IsTabStop = false;
+                    actualElement = (Button)FocusManager.FindNextFocusableElement(FocusNavigationDirection.Next);
+                }
                 Log.Comment("Expected: " + expectedElement.Content);
                 Log.Comment("Actual: " + actualElement.Content);
                 Verify.AreEqual(expectedElement, actualElement);

@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using Windows.Devices.PointOfService;
 using Windows.ApplicationModel.DataTransfer;
 using MUXControlsTestApp.Utilities;
+using System.Threading.Tasks;
 
 namespace MUXControlsTestApp
 {
@@ -56,11 +57,36 @@ namespace MUXControlsTestApp
             DataBindingTabView.TabItemsSource = itemSource;
         }
 
+        protected async override void OnNavigatedTo(Windows.UI.Xaml.Navigation.NavigationEventArgs args) 
+        {
+            NotCloseableTab.Visibility = Visibility.Collapsed;
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            NotCloseableTab.Visibility = Visibility.Visible;
+        }
+
         public void IsClosableCheckBox_CheckChanged(object sender, RoutedEventArgs e)
         {
             if (FirstTab != null)
             {
                 FirstTab.IsClosable = (bool)IsClosableCheckBox.IsChecked;
+            }
+        }
+
+        public void IsDisabledTabVisibleCheckBox_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            if (Tabs != null && DisabledTab != null)
+            {
+                var isVisible = (bool)IsDisabledTabVisibleCheckBox.IsChecked;
+                if (isVisible && !Tabs.TabItems.Contains(DisabledTab))
+                {
+                    // Let's insert the DisabledTab just after NotCloseableTab
+                    var n = Tabs.TabItems.IndexOf(NotCloseableTab) + 1;
+                    Tabs.TabItems.Insert(n, DisabledTab);
+                }
+                else
+                {
+                    Tabs.TabItems.Remove(DisabledTab);
+                }
             }
         }
 
@@ -72,7 +98,6 @@ namespace MUXControlsTestApp
                 item.IconSource = _iconSource;
                 item.Header = "New Tab " + _newTabNumber;
                 item.Content = item.Header;
-                item.SetValue(AutomationProperties.NameProperty, item.Header);
 
                 Tabs.TabItems.Add(item);
 
@@ -117,15 +142,15 @@ namespace MUXControlsTestApp
 
         public void GetTab0ToolTipButton_Click(object sender, RoutedEventArgs e)
         {
-            GetToolTipStringForTab(FirstTab, Tab0ToolTipTextBlock);
+            GetToolTipStringForUIElement(FirstTab, Tab0ToolTipTextBlock);
         }
 
         public void GetTab1ToolTipButton_Click(object sender, RoutedEventArgs e)
         {
-            GetToolTipStringForTab(SecondTab, Tab1ToolTipTextBlock);
+            GetToolTipStringForUIElement(SecondTab, Tab1ToolTipTextBlock);
         }
 
-        public void GetToolTipStringForTab(TabViewItem item, TextBlock textBlock)
+        public void GetToolTipStringForUIElement(UIElement item, TextBlock textBlock)
         {
             var tooltip = ToolTipService.GetToolTip(item);
             if (tooltip is ToolTip)
@@ -166,8 +191,22 @@ namespace MUXControlsTestApp
             {
                 switch (TabWidthComboBox.SelectedIndex)
                 {
-                    case 0: Tabs.TabWidthMode = Microsoft.UI.Xaml.Controls.TabViewWidthMode.SizeToContent; break;
-                    case 1: Tabs.TabWidthMode = Microsoft.UI.Xaml.Controls.TabViewWidthMode.Equal; break;
+                    case 0: Tabs.TabWidthMode = Microsoft.UI.Xaml.Controls.TabViewWidthMode.Equal; break;
+                    case 1: Tabs.TabWidthMode = Microsoft.UI.Xaml.Controls.TabViewWidthMode.SizeToContent; break;
+                    case 2: Tabs.TabWidthMode = Microsoft.UI.Xaml.Controls.TabViewWidthMode.Compact; break;
+                }
+            }
+        }
+
+        private void CloseButtonOverlayModeCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Tabs != null)
+            {
+                switch (CloseButtonOverlayModeCombobox.SelectedIndex)
+                {
+                    case 0: Tabs.CloseButtonOverlayMode = Microsoft.UI.Xaml.Controls.TabViewCloseButtonOverlayMode.Auto; break;
+                    case 1: Tabs.CloseButtonOverlayMode = Microsoft.UI.Xaml.Controls.TabViewCloseButtonOverlayMode.OnPointerOver; break;
+                    case 2: Tabs.CloseButtonOverlayMode = Microsoft.UI.Xaml.Controls.TabViewCloseButtonOverlayMode.Always; break;
                 }
             }
         }
@@ -298,7 +337,8 @@ namespace MUXControlsTestApp
 
         public void SetTabViewWidth_Click(object sender, RoutedEventArgs e)
         {
-            Tabs.Width = 690;
+            // This is the smallest width that fits our content without any scrolling.
+            Tabs.Width = 740;
         }
 
         public void GetScrollButtonsVisible_Click(object sender, RoutedEventArgs e)
@@ -319,6 +359,36 @@ namespace MUXControlsTestApp
             }
         }
 
+        public void TabViewScrollToTheLeftButton_Click(object sender, RoutedEventArgs e)
+        {
+            var scrollViewer = VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollViewer") as ScrollViewer;
+            scrollViewer.ChangeView(0, null, null, true);
+        }
+
+        public void TabViewScrollToTheMiddleButton_Click(object sender, RoutedEventArgs e)
+        {
+            var scrollViewer = VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollViewer") as ScrollViewer;
+            scrollViewer.ChangeView(scrollViewer.ScrollableWidth / 2.0f, null, null, true);
+        }
+
+        public void TabViewScrollToTheRightButton_Click(object sender, RoutedEventArgs e)
+        {
+            var scrollViewer = VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollViewer") as ScrollViewer;
+            scrollViewer.ChangeView(double.MaxValue, null, null, true);
+        }
+
+        public void GetScrollDecreaseButtonEnabled_Click(object sender, RoutedEventArgs e)
+        {
+            var scrollDecreaseButton = VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollDecreaseButton") as RepeatButton;
+            ScrollDecreaseButtonEnabled.Text = scrollDecreaseButton.IsEnabled ? "True" : "False";
+        }
+
+        public void GetScrollIncreaseButtonEnabled_Click(object sender, RoutedEventArgs e)
+        {
+            var scrollIncreaseButton = VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollIncreaseButton") as RepeatButton;
+            ScrollIncreaseButtonEnabled.Text = scrollIncreaseButton.IsEnabled ? "True" : "False";
+        }
+
         private void TabViewSizingPageButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(TabViewSizingPage));
@@ -328,6 +398,31 @@ namespace MUXControlsTestApp
         {
             FirstTab.Header = "s";
             LongHeaderTab.Header = "long long long long long long long long";
+        }
+
+        private void GetScrollDecreaseButtonToolTipButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollDecreaseButton") is RepeatButton scrollDecreaseButton)
+            {
+                GetToolTipStringForUIElement(scrollDecreaseButton, ScrollDecreaseButtonToolTipTextBlock);
+            }
+        }
+
+        private void GetScrollIncreaseButtonToolTipButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (VisualTreeUtils.FindVisualChildByName(Tabs, "ScrollIncreaseButton") is RepeatButton scrollIncreaseButton)
+            {
+                GetToolTipStringForUIElement(scrollIncreaseButton, ScrollIncreaseButtonToolTipTextBlock);
+            }
+        }
+
+        private void GetSecondTabHeaderForegroundButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FindVisualChildByName(SecondTab, "ContentPresenter") is ContentPresenter presenter
+                && presenter.Foreground is SolidColorBrush brush)
+            {
+                SecondTabHeaderForegroundTextBlock.Text = brush.Color.ToString();
+            }
         }
     }
 }

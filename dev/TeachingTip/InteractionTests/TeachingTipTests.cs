@@ -117,6 +117,73 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
         }
 
         [TestMethod]
+        public void TargetUnloadingClosesTeachingTip()
+        {
+            using (var setup = new TestSetupHelper("TeachingTip Tests"))
+            {
+                elements = new TeachingTipTestPageElements();
+                elements.GetSetTargetButton().InvokeAndWait();
+                OpenTeachingTip();
+
+                CheckBox unloadedCheckbox = elements.GetTeachingTipContentUnloadedCheck();
+                Verify.IsTrue(unloadedCheckbox.ToggleState == ToggleState.Off);
+
+                // Removing target button from visual tree
+                Button remove = elements.GetRemoveOpenButtonFromVisualTreeButton();
+                remove.InvokeAndWait();
+
+                // Target unloaded, TeachingTip must do the same
+                Verify.IsTrue(unloadedCheckbox.ToggleState == ToggleState.On);
+            }
+        }
+
+        [TestMethod]
+        public void PreviousTargetUnloadingLeavesTeachingTipOpen()
+        {
+            using (var setup = new TestSetupHelper("TeachingTip Tests"))
+            {
+                elements = new TeachingTipTestPageElements();
+                elements.GetSetTargetButton().InvokeAndWait();
+                elements.GetRemoveTargetButton().InvokeAndWait();
+                OpenTeachingTip();
+
+                CheckBox unloadedCheckbox = elements.GetTeachingTipContentUnloadedCheck();
+                Verify.IsTrue(unloadedCheckbox.ToggleState == ToggleState.Off);
+
+
+                // Removing target button from visual tree
+                Button remove = elements.GetRemoveOpenButtonFromVisualTreeButton();
+                remove.InvokeAndWait();
+
+                // We expect the teaching tip to still be upon since it has no target
+                Verify.IsTrue(unloadedCheckbox.ToggleState == ToggleState.Off);
+            }
+        }
+
+        [TestMethod]
+        public void TeachingTipRemovalClosesPopup()
+        {
+            using (var setup = new TestSetupHelper("TeachingTip Tests"))
+            {
+                elements = new TeachingTipTestPageElements();
+                ScrollTargetIntoView();
+                OpenTeachingTip();
+
+                CheckBox unloadedCheckbox = elements.GetTeachingTipContentUnloadedCheck();
+                Verify.IsTrue(unloadedCheckbox.ToggleState == ToggleState.Off);
+
+                // Finding the button to remove the teaching tip
+                Button removeButton = elements.GetRemoveTeachingTipButton();
+
+                // Removing teaching tip
+                
+                removeButton.InvokeAndWait();
+                Verify.IsTrue(unloadedCheckbox.ToggleState == ToggleState.On);
+                Verify.IsTrue(elements.GetIsOpenCheckBox().ToggleState == ToggleState.Off);
+            }
+        }
+
+        [TestMethod]
         public void TipCanFollowTarget()
         {
             using (var setup = new TestSetupHelper("TeachingTip Tests"))
@@ -173,6 +240,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
         }
 
         [TestMethod]
+        [TestProperty("Ignore", "True")] // #2219 Unreliable test: TeachingTipTests.TipFollowsTargetOnWindowResize 
         public void TipFollowsTargetOnWindowResize()
         {
             if (!PlatformConfiguration.IsOsVersionGreaterThanOrEqual(OSVersion.Redstone3))
@@ -206,6 +274,33 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
 
                     Verify.IsLessThan(GetTipVerticalOffset(), initialTipVerticalOffset);
                 }
+
+                // Test for bug #1547
+                // Maximize window first.
+                var getOnEdgeOffsetButton = elements.GetTeachingTipOnEdgeOffsetButton();
+                KeyboardHelper.PressKey(Key.Up, ModifierKey.Windows);
+                Wait.ForIdle();
+
+                // Open TeachingTip
+                elements.GetOpenTeachingTipOnEdgeButton().InvokeAndWait();
+                
+                // Get offset values
+                getOnEdgeOffsetButton.InvokeAndWait();
+                double oldXOffset = elements.GetTeachingTipOnEdgeHorizontalOffset();
+
+                // "Restore" window width (aka unminimize)
+                KeyboardHelper.PressKey(Key.Down, ModifierKey.Windows);
+                getOnEdgeOffsetButton.InvokeAndWait();
+                Verify.IsLessThan(elements.GetTeachingTipOnEdgeHorizontalOffset(), oldXOffset);
+                
+                // Update values
+                getOnEdgeOffsetButton.InvokeAndWait();
+                oldXOffset = elements.GetTeachingTipOnEdgeHorizontalOffset();
+
+                // Maximize again
+                KeyboardHelper.PressKey(Key.Up, ModifierKey.Windows);
+                getOnEdgeOffsetButton.InvokeAndWait();
+                Verify.IsGreaterThan(elements.GetTeachingTipOnEdgeHorizontalOffset(), oldXOffset);
             }
         }
 
@@ -543,6 +638,28 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
             }
         }
 
+        //[TestMethod] Disabled with issue #1769
+        public void SettingTitleOrSubtitleToEmptyStringCollapsesTextBox()
+        {
+            using (var setup = new TestSetupHelper("TeachingTip Tests"))
+            {
+                elements = new TeachingTipTestPageElements();
+                foreach (TipLocationOptions location in Enum.GetValues(typeof(TipLocationOptions)))
+                {
+                    SetTeachingTipLocation(location);
+                    ScrollTargetIntoView();
+                    OpenTeachingTip();
+                    Verify.AreEqual("Visible", elements.GetTitleVisibilityTextBlock().GetText());
+                    Verify.AreEqual("Visible", elements.GetSubtitleVisibilityTextBlock().GetText());
+                    SetTitle(TitleContentOptions.No);
+                    Verify.AreEqual("Collapsed", elements.GetTitleVisibilityTextBlock().GetText());
+                    Verify.AreEqual("Visible", elements.GetSubtitleVisibilityTextBlock().GetText());
+                    SetSubtitle(SubtitleContentOptions.No);
+                    Verify.AreEqual("Collapsed", elements.GetTitleVisibilityTextBlock().GetText());
+                    Verify.AreEqual("Collapsed", elements.GetSubtitleVisibilityTextBlock().GetText());
+                }
+            }
+        }
 
         private void TestAutoPlacementForWindowOrScreenBounds(Vector4 targetRect, bool forWindowBounds)
         {
@@ -849,6 +966,40 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
                     break;
             }
             elements.GetSetHeroContentButton().InvokeAndWait();
+        }
+
+        private void SetTitle(TitleContentOptions title)
+        {
+            switch(title)
+            {
+                case TitleContentOptions.Long:
+                    elements.GetTitleComboBox().SelectItemByName("Long text");
+                    break;
+                case TitleContentOptions.Small:
+                    elements.GetTitleComboBox().SelectItemByName("Samell text");
+                    break;
+                case TitleContentOptions.No:
+                    elements.GetTitleComboBox().SelectItemByName("No title");
+                    break;
+            }
+            elements.GetSetTitleButton().InvokeAndWait();
+        }
+
+        private void SetSubtitle(SubtitleContentOptions subtitle)
+        {
+            switch (subtitle)
+            {
+                case SubtitleContentOptions.Long:
+                    elements.GetSubtitleComboBox().SelectItemByName("Long text");
+                    break;
+                case SubtitleContentOptions.Small:
+                    elements.GetSubtitleComboBox().SelectItemByName("Small text");
+                    break;
+                case SubtitleContentOptions.No:
+                    elements.GetSubtitleComboBox().SelectItemByName("No subtitle");
+                    break;
+            }
+            elements.GetSetSubtitleButton().InvokeAndWait();
         }
 
         private void SetTipIsTargeted(bool targeted)

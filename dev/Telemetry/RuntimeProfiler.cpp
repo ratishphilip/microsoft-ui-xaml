@@ -5,8 +5,14 @@
 #include "RuntimeProfiler.h"
 #include "TraceLogging.h"
 
+#pragma warning(push)
+#pragma warning(disable : 26812)
+
 #define DEFINE_PROFILEGROUP(name, group, size) \
     CMethodProfileGroup<size>        name(group)
+
+// defined in dllmain.cpp with values from version.h
+extern const char *g_BinaryVersion;
 
 namespace RuntimeProfiler {
 
@@ -15,8 +21,8 @@ namespace RuntimeProfiler {
     struct FunctionTelemetryCount
     {
         volatile LONG      *pInstanceCount{ nullptr };
-        volatile UINT16     uTypeIndex;
-        volatile UINT16     uMethodIndex;
+        volatile UINT16     uTypeIndex{};
+        volatile UINT16     uMethodIndex{};
     };
 
     class CMethodProfileGroupBase
@@ -158,7 +164,8 @@ namespace RuntimeProfiler {
             TraceLoggingWrite(  
                 g_hTelemetryProvider,  
                 "RuntimeProfiler",
-                TraceLoggingDescription("XAML methods that have been called."),  
+                TraceLoggingDescription("XAML methods that have been called."),
+                TraceLoggingString(g_BinaryVersion, "BinaryVersion"),
                 TraceLoggingWideString(OutputBuffer, "ApiCounts"),
                 TraceLoggingUInt32(((UINT32)m_group), "ProfileGroupId"),
                 TraceLoggingUInt32(((UINT32)cMethods),"TotalCount"),
@@ -283,3 +290,5 @@ STDAPI_(void) SendTelemetryOnSuspend() noexcept
 {
     RuntimeProfiler::FireEvent(true);
 }
+
+#pragma warning(pop)

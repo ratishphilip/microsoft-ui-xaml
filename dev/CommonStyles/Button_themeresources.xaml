@@ -6,7 +6,7 @@
     xmlns:contract7NotPresent="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractNotPresent(Windows.Foundation.UniversalApiContract,7)">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlForegroundAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlBackgroundAccentBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemAccentColorLight1" />
             <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemAccentColorDark1" />
             <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
@@ -43,15 +43,15 @@
             <SolidColorBrush x:Key="ButtonPressedForegroundThemeBrush" Color="#FF000000" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
-            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlForegroundAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlHighlightAccentBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemControlForegroundAccentBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowBrush" />
             <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
-            <StaticResource x:Key="AccentButtonForeground" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
+            <StaticResource x:Key="AccentButtonForeground" ResourceKey="SystemControlHighlightAltAccentBrush" />
             <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
             <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="SystemControlHighlightBaseHighBrush" />
             <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
-            <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="SystemControlForegroundTransparentBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="SystemControlHighlightAccentBrush" />
             <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
             <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentBrush" />
             <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
@@ -80,7 +80,7 @@
             <SolidColorBrush x:Key="ButtonPressedForegroundThemeBrush" Color="{ThemeResource SystemColorButtonFaceColor}" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlForegroundAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlBackgroundAccentBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemAccentColorLight1" />
             <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemAccentColorDark1" />
             <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
@@ -225,6 +225,7 @@
                         x:Name="ContentPresenter"
                         Background="{TemplateBinding Background}"
                         contract7Present:BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                        Foreground="{TemplateBinding Foreground}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         Content="{TemplateBinding Content}"

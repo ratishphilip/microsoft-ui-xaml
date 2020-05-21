@@ -118,7 +118,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
         {
             using (var setup = new TestSetupHelper("TabView Tests"))
             {
-                UIObject smallerTab = FindElement.ByName("FirstTab");
+                UIObject smallerTab = FindElement.ByName("SecondTab");
                 UIObject largerTab = FindElement.ByName("LongHeaderTab");
 
                 FindElement.ByName<Button>("SetTabViewWidth").InvokeAndWait();
@@ -137,19 +137,26 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
                 Log.Comment("Tab with larger content should be wider.");
                 Verify.IsGreaterThan(largerTab.BoundingRectangle.Width, smallerTab.BoundingRectangle.Width);
 
-                Log.Comment("Changing tab header to short/long.");
-                Button shortLongButton = FindElement.ByName<Button>("ShortLongTextButton");
-                shortLongButton.InvokeAndWait();
-                ElementCache.Refresh();
-
-                diff = Math.Abs(smallerTab.BoundingRectangle.Width - 100);
-                Verify.IsLessThanOrEqual(diff, 1, "Smaller text should have min width of 100");
-
-                diff = Math.Abs(largerTab.BoundingRectangle.Width - 240);
-                Verify.IsLessThanOrEqual(diff, 1, "Smaller text should have max width of 240");
-
                 // With largerTab now rendering wider, the scroll buttons should appear:
                 Verify.IsTrue(AreScrollButtonsVisible(), "Scroll buttons should appear");
+
+                // Scroll all the way to the left and verify decrease/increase button visual state
+                FindElement.ByName<Button>("ScrollTabViewToTheLeft").InvokeAndWait();
+                Wait.ForIdle();
+                Verify.IsFalse(IsScrollDecreaseButtonEnabled(), "Scroll decrease button should be disabled");
+                Verify.IsTrue(IsScrollIncreaseButtonEnabled(), "Scroll increase button should be enabled");
+
+                // Scroll to the middle position and verify decrease/increase button visual state
+                FindElement.ByName<Button>("ScrollTabViewToTheMiddle").InvokeAndWait();
+                Wait.ForIdle();
+                Verify.IsTrue(IsScrollDecreaseButtonEnabled(), "Scroll decrease button should be enabled");
+                Verify.IsTrue(IsScrollIncreaseButtonEnabled(), "Scroll increase button should be enabled");
+
+                // Scroll all the way to the right and verify decrease/increase button visual state
+                FindElement.ByName<Button>("ScrollTabViewToTheRight").InvokeAndWait();
+                Wait.ForIdle();
+                Verify.IsTrue(IsScrollDecreaseButtonEnabled(), "Scroll decrease button should be enabled");
+                Verify.IsFalse(IsScrollIncreaseButtonEnabled(), "Scroll increase button should be disabled");
 
                 // Close a tab to make room. The scroll buttons should disappear:
                 Log.Comment("Closing a tab:");
@@ -197,11 +204,31 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
             }
         }
 
+        private bool IsScrollIncreaseButtonEnabled()
+        {
+            FindElement.ByName<Button>("GetScrollIncreaseButtonEnabled").InvokeAndWait();
+            var scrollIncreaseButtonEnabled = FindElement.ByName<TextBlock>("ScrollIncreaseButtonEnabled").DocumentText;
+            return scrollIncreaseButtonEnabled == "True";
+        }
+
+        private bool IsScrollDecreaseButtonEnabled()
+        {
+            FindElement.ByName<Button>("GetScrollDecreaseButtonEnabled").InvokeAndWait();
+            var scrollDecreaseButtonEnabled = FindElement.ByName<TextBlock>("ScrollDecreaseButtonEnabled").DocumentText;
+            return scrollDecreaseButtonEnabled == "True";
+        }
+
         [TestMethod]
         public void CloseSelectionTest()
         {
             using (var setup = new TestSetupHelper("TabView Tests"))
             {
+                Log.Comment("Hiding the disabled tab");
+                var disabledTabCheckBox = FindElement.ByName<CheckBox>("IsDisabledTabVisibleCheckBox");
+                Verify.IsNotNull(disabledTabCheckBox);
+                disabledTabCheckBox.Uncheck();
+
+                Log.Comment("Finding the first tab");
                 UIObject firstTab = FindElement.ByName("FirstTab");
                 Button closeButton = FindCloseButton(firstTab);
                 Verify.IsNotNull(closeButton);
@@ -413,6 +440,49 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
             }
         }
 
+        [TestMethod]
+        public void CloseButtonOverlayModeTests()
+        {
+            using(var setup = new TestSetupHelper("TabView Tests"))
+            {
+                ComboBox closeButtonOverlayModeComboBox = FindElement.ByName<ComboBox>("CloseButtonOverlayModeCombobox");
+                closeButtonOverlayModeComboBox.SelectItemByName("OnPointerOver");
+                Wait.ForIdle();
+
+                Button closeUnselectedButton = FindCloseButton(FindElement.ByName("LongHeaderTab"));
+                Button closeSelectedButton = FindCloseButton(FindElement.ByName("FirstTab"));
+                Verify.IsNull(closeUnselectedButton);
+                Verify.IsNotNull(closeSelectedButton);
+
+                closeButtonOverlayModeComboBox.SelectItemByName("Always");
+                Wait.ForIdle();
+
+                // Verifiying "Always" works correctly
+                closeSelectedButton = FindCloseButton(FindElement.ByName("FirstTab"));
+                closeUnselectedButton = FindCloseButton(FindElement.ByName("LongHeaderTab"));
+                Verify.IsNotNull(closeUnselectedButton);
+                Verify.IsNotNull(closeSelectedButton);
+
+                // Verifiying "OnPointerOver" works correctly
+                closeButtonOverlayModeComboBox.SelectItemByName("OnPointerOver");
+                Wait.ForIdle();
+
+                closeSelectedButton = FindCloseButton(FindElement.ByName("FirstTab"));
+                closeUnselectedButton = FindCloseButton(FindElement.ByName("LongHeaderTab"));
+                Verify.IsNull(closeUnselectedButton);
+                Verify.IsNotNull(closeSelectedButton);
+               
+                // Verifiying "Auto" works correctly
+                closeButtonOverlayModeComboBox.SelectItemByName("Auto");
+                Wait.ForIdle();
+
+                closeSelectedButton = FindCloseButton(FindElement.ByName("FirstTab"));
+                closeUnselectedButton = FindCloseButton(FindElement.ByName("LongHeaderTab"));
+                Verify.IsNotNull(closeUnselectedButton);
+                Verify.IsNotNull(closeSelectedButton);
+
+            }
+        } 
 
         [TestMethod]
         public void GamePadTest()
@@ -420,7 +490,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
             using (var setup = new TestSetupHelper("TabView Tests"))
             {
                 Button tabContent = FindElement.ByName<Button>("FirstTabButton");
-                Button backButton = FindElement.ById<Button>("__BackButton");
+                Button toggleThemeButton = FindElement.ById<Button>("__ToggleThemeButton");
                 TabItem firstTab = FindElement.ByName<TabItem>("FirstTab");
                 TabItem secondTab = FindElement.ByName<TabItem>("SecondTab");
                 TabItem lastTab = FindElement.ByName<TabItem>("LastTab");
@@ -446,7 +516,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
 
                 GamepadHelper.PressButton(null, GamepadButton.LeftThumbstickUp);
                 Wait.ForIdle();
-                Verify.IsTrue(backButton.HasKeyboardFocus, "GamePad Up should move to back button");
+                Verify.IsTrue(toggleThemeButton.HasKeyboardFocus, "GamePad Up should move to toggle theme button");
             }
         }
 
@@ -477,7 +547,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
                 PressButtonAndVerifyText("GetTab0ToolTipButton", "Tab0ToolTipTextBlock", "Custom Tooltip");
 
                 Log.Comment("If the app does not set a custom tooltip, it should be the same as the header text.");
-                PressButtonAndVerifyText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Shop");
+                PressButtonAndVerifyText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "SecondTab");
 
                 Button changeShopTextButton = FindElement.ByName<Button>("ChangeShopTextButton");
                 changeShopTextButton.InvokeAndWait();
@@ -506,13 +576,84 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
             }
         }
 
+        [TestMethod]
+        public void CloseButtonDoesNotShowWhenVisibilityIsToggled()
+        {
+            using (var setup = new TestSetupHelper("TabView Tests"))
+            {
+                // Wait for the test page's timer to set visibility to the close button to visible
+                Wait.ForMilliseconds(2);
+                Wait.ForIdle();
+
+                UIObject notCloseableTab = FindElement.ByName("NotCloseableTab");
+                var closeButton = FindCloseButton(notCloseableTab);
+                Verify.IsNull(closeButton);
+            }
+        }
+
+        [TestMethod]
+        public void SizingTest()
+        {
+            using (var setup = new TestSetupHelper("TabView Tests"))
+            {
+                Button sizingPageButton = FindElement.ByName<Button>("TabViewSizingPageButton");
+                sizingPageButton.InvokeAndWait();
+                Wait.ForMilliseconds(200);
+                ElementCache.Refresh();
+
+                Button setSmallWidthButton = FindElement.ByName<Button>("SetSmallWidth");
+                setSmallWidthButton.InvokeAndWait();
+
+                Button getWidthsButton = FindElement.ByName<Button>("GetWidthsButton");
+                getWidthsButton.InvokeAndWait();
+
+                TextBlock widthEqualText = FindElement.ByName<TextBlock>("WidthEqualText");
+                TextBlock widthSizeToContentText = FindElement.ByName<TextBlock>("WidthSizeToContentText");
+
+                Verify.AreEqual("400", widthEqualText.DocumentText);
+                Verify.AreEqual("400", widthSizeToContentText.DocumentText);
+
+                Button setLargeWidthButton = FindElement.ByName<Button>("SetLargeWidth");
+                setLargeWidthButton.InvokeAndWait();
+
+                getWidthsButton.InvokeAndWait();
+
+                Verify.AreEqual("700", widthEqualText.DocumentText);
+                Verify.AreEqual("700", widthSizeToContentText.DocumentText);
+            }
+        }
+
+        [TestMethod]
+        public void ScrollButtonToolTipTest()
+        {
+            using (var setup = new TestSetupHelper("TabView Tests"))
+            {
+                PressButtonAndVerifyText("GetScrollDecreaseButtonToolTipButton", "ScrollDecreaseButtonToolTipTextBlock", "Scroll tab list backward");
+                PressButtonAndVerifyText("GetScrollIncreaseButtonToolTipButton", "ScrollIncreaseButtonToolTipTextBlock", "Scroll tab list forward");
+            }
+        }
+
+        [TestMethod]
+        public void VerifyTabViewItemHeaderForegroundResource()
+        {
+            using (var setup = new TestSetupHelper("TabView Tests"))
+            {
+                Button getSecondTabHeaderForegroundButton = FindElement.ByName<Button>("GetSecondTabHeaderForegroundButton");
+                getSecondTabHeaderForegroundButton.InvokeAndWait();
+
+                TextBlock secondTabHeaderForegroundTextBlock = FindElement.ByName<TextBlock>("SecondTabHeaderForegroundTextBlock");
+
+                Verify.AreEqual("#FF008000", secondTabHeaderForegroundTextBlock.DocumentText);
+            }
+        }
+
         public void PressButtonAndVerifyText(String buttonName, String textBlockName, String expectedText)
         {
             Button button = FindElement.ByName<Button>(buttonName);
             button.InvokeAndWait();
 
             TextBlock textBlock = FindElement.ByName<TextBlock>(textBlockName);
-            Verify.AreEqual(textBlock.DocumentText, expectedText);
+            Verify.AreEqual(expectedText, textBlock.DocumentText);
         }
 
         Button FindCloseButton(UIObject tabItem)

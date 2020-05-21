@@ -62,8 +62,11 @@ namespace MUXControlsTestApp
             TeachingTipTestHooks.EffectivePlacementChanged += TeachingTipTestHooks_EffectivePlacementChanged;
             TeachingTipTestHooks.EffectiveHeroContentPlacementChanged += TeachingTipTestHooks_EffectiveHeroContentPlacementChanged;
             TeachingTipTestHooks.OffsetChanged += TeachingTipTestHooks_OffsetChanged;
+            TeachingTipTestHooks.TitleVisibilityChanged += TeachingTipTestHooks_TitleVisibilityChanged;
+            TeachingTipTestHooks.SubtitleVisibilityChanged += TeachingTipTestHooks_SubtitleVisibilityChanged;
             this.TeachingTipInVisualTree.Closed += TeachingTipInVisualTree_Closed;
             this.TeachingTipInResources.Closed += TeachingTipInResources_Closed;
+            this.TeachingTipInResourcesOnEdge.Closed += TeachingTipInResourcesOnEdge_Closed;
             this.ContentScrollViewer.ViewChanged += ContentScrollViewer_ViewChanged;
         }
 
@@ -72,6 +75,13 @@ namespace MUXControlsTestApp
             if (TeachingTipInResourcesRoot != null)
             {
                 TeachingTipInResourcesRoot.SizeChanged -= TeachingTip_SizeChanged;
+            }
+        }
+        private void TeachingTipInResourcesOnEdge_Closed(TeachingTip sender, TeachingTipClosedEventArgs args)
+        {
+            if (TeachingTipInResourcesOnEdge != null)
+            {
+                TeachingTipInResourcesOnEdge.SizeChanged -= TeachingTip_SizeChanged;
             }
         }
 
@@ -85,23 +95,14 @@ namespace MUXControlsTestApp
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            if (this.TeachingTipInResources != null && this.TeachingTipInResources.IsOpen)
-            {
-                this.TeachingTipInResources.IsOpen = false;
+            if (testWindowBounds != null && testWindowBounds.IsOpen)	
+            {	
+                testWindowBounds.IsOpen = false;	
+            }	
+            if(testScreenBounds != null && testScreenBounds.IsOpen)	
+            {	
+                testScreenBounds.IsOpen = false;	
             }
-            if (this.TeachingTipInVisualTree != null && this.TeachingTipInVisualTree.IsOpen)
-            {
-                this.TeachingTipInVisualTree.IsOpen = false;
-            }
-            if (testWindowBounds != null && testWindowBounds.IsOpen)
-            {
-                testWindowBounds.IsOpen = false;
-            }
-            if(testScreenBounds != null && testScreenBounds.IsOpen)
-            {
-                testScreenBounds.IsOpen = false;
-            }
-
             base.OnNavigatedFrom(e);
         }
 
@@ -118,6 +119,22 @@ namespace MUXControlsTestApp
             {
                 this.PopupVerticalOffsetTextBlock.Text = TeachingTipTestHooks.GetVerticalOffset(sender).ToString();
                 this.PopupHorizontalOffsetTextBlock.Text = TeachingTipTestHooks.GetHorizontalOffset(sender).ToString();
+            }
+        }
+
+        private void TeachingTipTestHooks_TitleVisibilityChanged(TeachingTip sender, object args)
+        {
+            if (sender == getTeachingTip())
+            {
+                this.TitleVisibilityTextBlock.Text = TeachingTipTestHooks.GetTitleVisibility(sender).ToString();
+            }
+        }
+
+        private void TeachingTipTestHooks_SubtitleVisibilityChanged(TeachingTip sender, object args)
+        {
+            if (sender == getTeachingTip())
+            {
+                this.SubtitleVisibilityTextBlock.Text = TeachingTipTestHooks.GetSubtitleVisibility(sender).ToString();
             }
         }
 
@@ -666,6 +683,19 @@ namespace MUXControlsTestApp
             NotifyPropertyChanged("CurrentCancelClosesCheckBox");
         }
 
+        public void OnShowButtonClickedRightEdge(object sender, RoutedEventArgs args)
+        {
+            TeachingTipInResourcesOnEdge.IsOpen = true;
+            TeachingTipInResourcesOnEdge.SizeChanged += TeachingTip_SizeChanged;
+            TeachingTip_SizeChanged(TeachingTipInResourcesOnEdge, null);
+        }
+
+        public void GetEdgeTeachingTipOffset_Clicked(object sender, RoutedEventArgs args)
+        {
+            EdgeTeachingTipOffset.Text = TeachingTipTestHooks.GetHorizontalOffset(TeachingTipInResourcesOnEdge).ToString()  
+                + ";" + TeachingTipTestHooks.GetVerticalOffset(TeachingTipInResourcesOnEdge).ToString();
+        }
+
         public void OnShowAfterDelayButtonClicked(object sender, RoutedEventArgs args)
         {
             showTimer = new DispatcherTimer();
@@ -687,6 +717,8 @@ namespace MUXControlsTestApp
             TeachingTipInResourcesRoot = getTeachingTipRoot(getCancelClosesInTeachingTip());
             TeachingTipInResourcesRoot.SizeChanged += TeachingTip_SizeChanged;
             TeachingTip_SizeChanged(TeachingTipInResourcesRoot, null);
+            this.TitleVisibilityTextBlock.Text = TeachingTipTestHooks.GetTitleVisibility(this.TeachingTipInResources).ToString();
+            this.SubtitleVisibilityTextBlock.Text = TeachingTipTestHooks.GetSubtitleVisibility(this.TeachingTipInResources).ToString();
         }
 
         private void TeachingTipInVisualTreeRoot_Loaded(object sender, RoutedEventArgs e)
@@ -695,6 +727,9 @@ namespace MUXControlsTestApp
             TeachingTipInVisualTreeRoot = getTeachingTipRoot(getCancelClosesInTeachingTip());
             TeachingTipInVisualTreeRoot.SizeChanged += TeachingTip_SizeChanged;
             TeachingTip_SizeChanged(TeachingTipInVisualTreeRoot, null);
+
+            this.TitleVisibilityTextBlock.Text = TeachingTipTestHooks.GetTitleVisibility(this.TeachingTipInVisualTree).ToString();
+            this.SubtitleVisibilityTextBlock.Text = TeachingTipTestHooks.GetSubtitleVisibility(this.TeachingTipInVisualTree).ToString();
         }
 
         public void OnCloseButtonClicked(object sender, RoutedEventArgs args)
@@ -941,5 +976,22 @@ namespace MUXControlsTestApp
 
             return "Unknown";
         }
+
+        private void RemoveTeachingTipButton_Click(object sender, RoutedEventArgs e)
+        {
+            ContentStackPanel.Children.Remove(TeachingTipInVisualTree);
+            ContentStackPanel.Children.Remove(TeachingTipInResources);
+        }
+        
+        private void RemoveTeachingTipTextBlockContent_Unloaded(object sender, RoutedEventArgs e)
+        {
+            VisualTreeTeachingTipContentTextBlockUnloaded.IsChecked = true;
+        }
+    
+        private void RemoveOpenButton_Click(object sender, RoutedEventArgs e)
+        {
+            ContentStackPanel.Children.Remove(targetButton);
+        }
+        
     }
 }

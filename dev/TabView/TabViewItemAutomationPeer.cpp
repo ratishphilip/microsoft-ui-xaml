@@ -7,6 +7,9 @@
 #include "TabViewItem.h"
 #include "TabViewItemAutomationPeer.h"
 #include "Utils.h"
+#include "SharedHelpers.h"
+
+#include "TabViewItemAutomationPeer.properties.cpp"
 
 TabViewItemAutomationPeer::TabViewItemAutomationPeer(winrt::TabViewItem const& owner)
     : ReferenceTracker(owner)
@@ -24,3 +27,19 @@ winrt::AutomationControlType TabViewItemAutomationPeer::GetAutomationControlType
     return winrt::AutomationControlType::TabItem;
 }
 
+
+winrt::hstring TabViewItemAutomationPeer::GetNameCore()
+{
+    winrt::hstring returnHString = __super::GetNameCore();
+
+    // If a name hasn't been provided by AutomationProperties.Name in markup:
+    if (returnHString.empty())
+    {
+        if (auto tvi = Owner().try_as<winrt::TabViewItem>())
+        {
+            returnHString = SharedHelpers::TryGetStringRepresentationFromObject(tvi.Header());
+        }
+    }
+
+    return returnHString;
+}

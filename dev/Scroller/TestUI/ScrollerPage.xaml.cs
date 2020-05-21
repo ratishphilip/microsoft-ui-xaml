@@ -25,6 +25,9 @@ namespace MUXControlsTestApp
     {
         public ScrollerPage()
         {
+            // Some pages we will navigate to will need the resources, so lets load them now!
+            App.AppendResourceDictionaryToMergedDictionaries(App.AdditionStylesXaml);
+            
             LogController.InitializeLogging();
 
             this.InitializeComponent();
@@ -35,7 +38,8 @@ namespace MUXControlsTestApp
             navigateToChainingAndRailing.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerChainingAndRailingPage), 0); };
             navigateToStackPanelAnchoring.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerStackPanelAnchoringPage), 0); };
             navigateToRepeaterAnchoring.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerRepeaterAnchoringPage), 0); };
-            navigateToSnapPoints.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerSnapPointsPage), 0); };
+            navigateToScrollSnapPoints.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerScrollSnapPointsPage), 0); };
+            navigateToZoomSnapPoints.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerZoomSnapPointsPage), 0); };
             navigateToBringIntoView.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerBringIntoViewPage), 0); };
             navigateToManipulationMode.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerManipulationModePage), 0); };
             navigateToAccessibility.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerAccessibilityPage), 0); };
@@ -43,6 +47,7 @@ namespace MUXControlsTestApp
             navigateToCompositionScrollControllers.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerWithCompositionScrollControllersPage), 0); };
             navigateToBiDirectionalScrollController.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerWithBiDirectionalScrollControllerPage), 0); };
             navigateToLeakDetection.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerLeakDetectionPage), 0); };
+            navigateToMousePanning.Click += delegate { Frame.NavigateWithoutAnimation(typeof(ScrollerMousePanningPage), 0); };
 
             try
             {

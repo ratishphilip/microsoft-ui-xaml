@@ -530,8 +530,6 @@
         </Setter>
     </Style>
 
-    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource ComboBoxItemRevealStyle}" />
-
     <Style x:Key="CommandBarRevealStyle" TargetType="CommandBar">
         <Setter Property="Background" Value="{ThemeResource CommandBarBackground}" />
         <Setter Property="Foreground" Value="{ThemeResource CommandBarForeground}" />
@@ -542,6 +540,7 @@
         <Setter Property="VerticalContentAlignment" Value="Top" />
         <Setter Property="ClosedDisplayMode" Value="Compact" />
         <Setter Property="ExitDisplayModeOnAccessKeyInvoked" Value="False" />
+        <Setter Property="CommandBarOverflowPresenterStyle" Value="{ThemeResource DefaultCommandBarOverflowPresenterStyle}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CommandBar">

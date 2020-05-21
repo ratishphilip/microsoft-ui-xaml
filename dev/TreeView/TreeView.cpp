@@ -92,14 +92,12 @@ winrt::IVector<winrt::TreeViewNode> TreeView::SelectedNodes()
 
 void TreeView::SelectedItem(winrt::IInspectable const& item)
 {
-    auto selectedItems = SelectedItems();
-    if (selectedItems.Size() > 0)
+    if (auto listControl = ListControl())
     {
-        selectedItems.Clear();
-    }
-    if (item)
-    {
-        selectedItems.Append(item);
+        if (auto viewModel = listControl->ListViewModel())
+        {
+            viewModel->SelectSingleItem(item);
+        }
     }
 }
 
@@ -120,6 +118,20 @@ winrt::IVector<winrt::IInspectable> TreeView::SelectedItems()
     }
 
     return nullptr;
+}
+
+void TreeView::UpdateSelection(winrt::TreeViewNode const& node, bool isSelected)
+{
+    if (auto listControl = ListControl())
+    {
+        if (auto viewModel = listControl->ListViewModel())
+        {
+            if (isSelected != viewModel->IsNodeSelected(node))
+            {
+                viewModel->SelectNode(node, isSelected);
+            }
+        }
+    }
 }
 
 void TreeView::Expand(winrt::TreeViewNode const& value)
@@ -249,16 +261,38 @@ void TreeView::OnPropertyChanged(const winrt::DependencyPropertyChangedEventArgs
 
 void TreeView::OnListControlDragItemsStarting(const winrt::IInspectable& sender, const winrt::DragItemsStartingEventArgs& args)
 {
-    auto treeViewArgs = winrt::make_self<TreeViewDragItemsStartingEventArgs>();
-    treeViewArgs->DragItemsStartingEventArgs(args);
+    const auto treeViewArgs = winrt::make_self<TreeViewDragItemsStartingEventArgs>(args);
     m_dragItemsStartingEventSource(*this, *treeViewArgs);
 }
 
 void TreeView::OnListControlDragItemsCompleted(const winrt::IInspectable& sender, const winrt::DragItemsCompletedEventArgs& args)
 {
-    auto treeViewArgs = winrt::make_self<TreeViewDragItemsCompletedEventArgs>();
-    treeViewArgs->DragItemsCompletedEventArgs(args);
+    const auto newParent = [items = args.Items(), listControl = ListControl(), rootNode = m_rootNode.get()]()
+    {
+        if (listControl && items && items.Size() > 0)
+        {
+            if (const auto draggedNode = listControl->NodeFromItem(items.GetAt(0)))
+            {
+                const auto parentNode = draggedNode.Parent();
+                if (parentNode && parentNode != rootNode)
+                {
+                    return listControl->ItemFromNode(parentNode);
+                }
+            }
+        }
+        return static_cast<winrt::IInspectable>(nullptr);
+    }();
+
+    const auto treeViewArgs = winrt::make_self<TreeViewDragItemsCompletedEventArgs>(args, newParent);
     m_dragItemsCompletedEventSource(*this, *treeViewArgs);
+}
+
+void TreeView::OnListControlSelectionChanged(const winrt::IInspectable& sender, const winrt::SelectionChangedEventArgs& args)
+{
+    if (SelectionMode() == winrt::TreeViewSelectionMode::Single)
+    {
+        RaiseSelectionChanged(args.AddedItems(), args.RemovedItems());
+    }
 }
 
 void TreeView::UpdateItemsSelectionMode(bool isMultiSelect)
@@ -296,6 +330,12 @@ void TreeView::UpdateItemsSelectionMode(bool isMultiSelect)
     }
 }
 
+void TreeView::RaiseSelectionChanged(const winrt::IVector<winrt::IInspectable> addedItems, const winrt::IVector<winrt::IInspectable> removedItems)
+{
+    const auto treeViewArgs = winrt::make_self<TreeViewSelectionChangedEventArgs>(addedItems, removedItems);
+    m_selectionChangedEventSource(*this, *treeViewArgs);
+}
+
 void TreeView::OnApplyTemplate()
 {
     winrt::IControlProtected controlProtected = *this;
@@ -315,7 +355,7 @@ void TreeView::OnApplyTemplate()
             viewModel->IsContentMode(true);
         }
         viewModel->PrepareView(m_rootNode.get());
-        viewModel->SetOwningList(listControl);
+        viewModel->SetOwners(listControl, *this);
         viewModel->NodeExpanding({ this, &TreeView::OnNodeExpanding });
         viewModel->NodeCollapsed({ this, &TreeView::OnNodeCollapsed });
 
@@ -337,6 +377,7 @@ void TreeView::OnApplyTemplate()
         m_containerContentChangingRevoker = listControl.ContainerContentChanging(winrt::auto_revoke, { this, &TreeView::OnContainerContentChanging });
         m_dragItemsStartingRevoker = listControl.DragItemsStarting(winrt::auto_revoke, { this, &TreeView::OnListControlDragItemsStarting });
         m_dragItemsCompletedRevoker = listControl.DragItemsCompleted(winrt::auto_revoke, { this, &TreeView::OnListControlDragItemsCompleted });
+        m_selectionChangedRevoker = listControl.SelectionChanged(winrt::auto_revoke, { this, &TreeView::OnListControlSelectionChanged });
 
         if (m_pendingSelectedNodes && m_pendingSelectedNodes.get().Size() > 0)
         {

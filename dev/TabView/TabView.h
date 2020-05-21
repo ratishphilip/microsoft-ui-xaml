@@ -103,6 +103,7 @@ public:
     void OnKeyDown(winrt::KeyRoutedEventArgs const& e);
 
     // Internal
+    void OnCloseButtonOverlayModePropertyChanged(const winrt::DependencyPropertyChangedEventArgs& args);
     void OnTabWidthModePropertyChanged(const winrt::DependencyPropertyChangedEventArgs& args);
     void OnSelectedIndexPropertyChanged(const winrt::DependencyPropertyChangedEventArgs& args);
     void OnSelectedItemPropertyChanged(const winrt::DependencyPropertyChangedEventArgs& args);
@@ -114,13 +115,16 @@ public:
 
     winrt::UIElement GetShadowReceiver() { return m_shadowReceiver.get(); }
 
+    winrt::hstring GetTabCloseButtonTooltipText() { return m_tabCloseButtonTooltipText; }
+
 private:
     void OnLoaded(const winrt::IInspectable& sender, const winrt::RoutedEventArgs& args);
     void OnScrollViewerLoaded(const winrt::IInspectable& sender, const winrt::RoutedEventArgs& args);
     void OnAddButtonClick(const winrt::IInspectable& sender, const winrt::RoutedEventArgs& args);
     void OnScrollDecreaseClick(const winrt::IInspectable& sender, const winrt::RoutedEventArgs& args);
     void OnScrollIncreaseClick(const winrt::IInspectable& sender, const winrt::RoutedEventArgs& args);
-    void OnSizeChanged(const winrt::IInspectable& sender, const winrt::SizeChangedEventArgs& args);
+    void OnScrollViewerViewChanged(winrt::IInspectable const& sender, winrt::ScrollViewerViewChangedEventArgs const& args);
+    void OnItemsPresenterSizeChanged(const winrt::IInspectable& sender, const winrt::SizeChangedEventArgs& args);
 
     void OnListViewLoaded(const winrt::IInspectable& sender, const winrt::RoutedEventArgs& args);
     void OnListViewSelectionChanged(const winrt::IInspectable& sender, const winrt::SelectionChangedEventArgs& args);
@@ -142,6 +146,8 @@ private:
 
     void UpdateTabWidths();
 
+    void UpdateScrollViewerDecreaseAndIncreaseButtonsViewState();
+
     void OnListViewGettingFocus(const winrt::IInspectable& sender, const winrt::GettingFocusEventArgs& args);
 
     int GetItemCount();
@@ -158,7 +164,10 @@ private:
     tracker_ref<winrt::ContentPresenter> m_rightContentPresenter{ this };
     tracker_ref<winrt::Grid> m_tabContainerGrid{ this };
     tracker_ref<winrt::FxScrollViewer> m_scrollViewer{ this };
+    tracker_ref<winrt::RepeatButton> m_scrollDecreaseButton{ this };
+    tracker_ref<winrt::RepeatButton> m_scrollIncreaseButton{ this };
     tracker_ref<winrt::Button> m_addButton{ this };
+    tracker_ref<winrt::ItemsPresenter> m_itemsPresenter{ this };
 
     tracker_ref<winrt::Grid> m_shadowReceiver{ this };
 
@@ -172,13 +181,18 @@ private:
     winrt::UIElement::Drop_revoker m_listViewDropRevoker{};
 
     winrt::FxScrollViewer::Loaded_revoker m_scrollViewerLoadedRevoker{};
+    winrt::FxScrollViewer::ViewChanged_revoker m_scrollViewerViewChangedRevoker{};
 
     winrt::Button::Click_revoker m_addButtonClickRevoker{};
 
     winrt::RepeatButton::Click_revoker m_scrollDecreaseClickRevoker{};
     winrt::RepeatButton::Click_revoker m_scrollIncreaseClickRevoker{};
 
+    winrt::ItemsPresenter::SizeChanged_revoker m_itemsPresenterSizeChangedRevoker{};
+
     DispatcherHelper m_dispatcherHelper{ *this };
+
+    winrt::hstring m_tabCloseButtonTooltipText{};
 
     winrt::Size previousAvailableSize{};
 };

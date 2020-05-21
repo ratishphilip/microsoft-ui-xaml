@@ -32,14 +32,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests
 {
     [TestClass]
-    public class CommonStylesApiTests
+    public class CommonStylesApiTests : ApiTestBase
     {
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            TestUtilities.ClearVisualTreeRoot();
-        }
-
         [TestMethod]
         public void VerifyUseCompactResourcesAPI()
         {
@@ -77,7 +71,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests
                              xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
                              xmlns:primitives='using:Microsoft.UI.Xaml.Controls.Primitives'> 
                             <StackPanel.Resources>
-                                <primitives:CornerRadiusFilterConverter x:Key='TopCornerRadiusFilterConverter' Filter='Top'/>
+                                <primitives:CornerRadiusFilterConverter x:Key='TopCornerRadiusFilterConverter' Filter='Top' Scale='2'/>
                                 <primitives:CornerRadiusFilterConverter x:Key='RightCornerRadiusFilterConverter' Filter='Right'/>
                                 <primitives:CornerRadiusFilterConverter x:Key='BottomCornerRadiusFilterConverter' Filter='Bottom'/>
                                 <primitives:CornerRadiusFilterConverter x:Key='LeftCornerRadiusFilterConverter' Filter='Left'/>
@@ -102,7 +96,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests
                 var bottomRadiusGrid = (Grid)root.FindName("BottomRadiusGrid");
                 var leftRadiusGrid = (Grid)root.FindName("LeftRadiusGrid");
 
-                Verify.AreEqual(new CornerRadius(6, 6, 0, 0), topRadiusGrid.CornerRadius);
+                Verify.AreEqual(new CornerRadius(12, 12, 0, 0), topRadiusGrid.CornerRadius);
                 Verify.AreEqual(new CornerRadius(0, 6, 6, 0), rightRadiusGrid.CornerRadius);
                 Verify.AreEqual(new CornerRadius(0, 0, 6, 6), bottomRadiusGrid.CornerRadius);
                 Verify.AreEqual(new CornerRadius(6, 0, 0, 6), leftRadiusGrid.CornerRadius);
@@ -114,7 +108,7 @@ namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests
         {
             var controlsToVerify = new List<string> {
                 "AppBarButton", "AppBarToggleButton", "Button", "CheckBox",
-                "ContentDialog", "DatePicker", "FlipView", "ListViewItem",
+                "CommandBar", "ContentDialog", "DatePicker", "FlipView", "ListViewItem",
                 "PasswordBox", "Pivot", "PivotItem", "RichEditBox", "Slider", "SplitView",
                 "TextBox", "TimePicker", "ToolTip", "ToggleButton", "ToggleSwitch"};
 
@@ -138,6 +132,50 @@ namespace Windows.UI.Xaml.Tests.MUXControls.ApiTests
             {
                 Verify.Fail("One or more visual tree verification failed, see details above");
             }
+        }
+
+        [TestMethod]
+        [TestProperty("Ignore", "True")] // Disabled due to #2210: Unreliable test: CommonStylesApiTests.VerifyVisualTreeForCommandBarOverflowMenu
+        public void VerifyVisualTreeForCommandBarOverflowMenu()
+        {
+            StackPanel root = null;
+            CommandBar commandBar = null;
+            UIElement overflowContent = null;
+
+            RunOnUIThread.Execute(() => {
+                root = (StackPanel)XamlReader.Load(
+                    @"<StackPanel xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' 
+                        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'> 
+                            <CommandBar x:Name='TestCommandBar'>
+                                <AppBarButton Icon='AddFriend'/>
+                                <AppBarButton Icon='World' Label='World'/>
+                                <AppBarToggleButton Icon='Volume' Label='Volume'/>
+                                <CommandBar.SecondaryCommands>
+                                    <AppBarButton Label='Like'/>
+                                    <AppBarButton Label='Dislike'/>
+                                    <AppBarToggleButton Label='Toggle'/>
+                                </CommandBar.SecondaryCommands>
+                                <CommandBar.Content>
+                                    <TextBlock Text='Hello World' Margin='12'/>
+                                </CommandBar.Content>
+                            </CommandBar>
+                      </StackPanel>");
+
+                commandBar = (CommandBar)root.FindName("TestCommandBar");
+                Verify.IsNotNull(commandBar);
+                Content = root;
+                Content.UpdateLayout();
+                commandBar.IsOpen = true;
+                Content.UpdateLayout();
+                var popup = VisualTreeHelper.GetOpenPopups(Window.Current).Last();
+                Verify.IsNotNull(popup);
+                overflowContent = popup.Child;
+            });
+
+            var visualTreeDumperFilter = new VisualTreeDumper.DefaultFilter();
+            visualTreeDumperFilter.PropertyNameWhiteList.Remove("MaxWidth");
+            visualTreeDumperFilter.PropertyNameWhiteList.Remove("MaxHeight");
+            VisualTreeTestHelper.VerifyVisualTree(root: overflowContent, masterFilePrefix: "CommandBarOverflowMenu", filter: visualTreeDumperFilter);
         }
 
         private string XamlStringForControl(string controlName)
